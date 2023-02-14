@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "./Navbar.css";
-import axios from 'axios';
 import SpinnerWidget from "./SpinnerWidget";
 import "mdb-react-ui-kit/dist/css/mdb.min.css";
 import {
@@ -13,36 +12,58 @@ import {
   MDBInput,
   MDBRadio,
 } from "mdb-react-ui-kit";
+import axios from "axios";
 function Footer() {
   const PatientDetails = {
     FirstName: "",
     LastName: "",
     DOB: "",
-    Gender: "Female",
+    Gender: "Male",
     Phone: "",
   };
+  // const BASEURL="https://pneumonia-webapp-backend.herokuapp.com/predict"
+  const BASEURL="http://localhost:8000/upload"
   const [PatientRegistration, setUserRegistration] = useState(PatientDetails);
-  const [FileUpload, FileuploadComplete] = useState('');
+  const [FileUpload, SetFileuploadComplete] = useState();
 
   // handler for handling the patients details
   const handleinput = (e) => {
     const { name, value } = e.target;
     setUserRegistration({ ...PatientRegistration, [name]: value });
   };
-
+  
   // image handler for patient record
   const handleimagechange = (event) => {
-    FileuploadComplete(URL.createObjectURL(event.target.files[0]));
+    if (event.target.files && event.target.files[0]) {
+      SetFileuploadComplete(event.target.files[0])
+    }
   };
-  const formsubmithandler=(e)=>{
+  const formsubmithandler=async(e)=>{
     e.preventDefault();
+    if(!FileUpload){
+      alert('Please Select the Image for Prediction')
+    }
+    else
+   { 
     const finalobject=PatientRegistration;
-    finalobject["ObservationImage"]=FileUpload;
-    console.log(finalobject);
-     axios.post()
-     .then((result)=>{
-      //access the results here
-     }) 
+    console.log(FileUpload);
+    const json=JSON.stringify(finalobject);
+    const formdata=new FormData();
+    formdata.append('PatientDetails',json)
+    formdata.append('ObservationImage',FileUpload);
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    };
+    try {
+      const result=await axios.post(BASEURL,formdata,config);
+      console.log(result.data);
+    }
+    catch(err){
+      alert(`err message is ${err}`)
+    }
+}
   }
   return (
     <div className="">
@@ -146,11 +167,10 @@ function Footer() {
                   />
                 </MDBCol>
                 <MDBCol md="9" className="pe-5">
-                  <input type="file" className="form-control" id="customFile" onChange={handleimagechange}/>
+                  <input type="file" className="form-control" id="customFile" onChange={handleimagechange} accept='.jpg,.jpeg,.png'/>
                   <div className="small text-muted mt-2">
                     Upload your X-Ray Image in .jpg, .png, .jpeg{" "}
                   </div>
-                  <label>{FileUpload}</label>
                 </MDBCol>
               </MDBRow>
               <MDBBtn className="mb-4" size="lg" onClick={formsubmithandler}>
