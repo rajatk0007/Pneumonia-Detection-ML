@@ -29,6 +29,10 @@ const patient=new mongoose.Schema({
     ReportPhoto:{
        type:String,
        required:true
+    },
+    PredictionResult:{
+        type:String,
+        required:true
     }
 })
 const Patientmodel=new mongoose.model("Patientmodel",patient);

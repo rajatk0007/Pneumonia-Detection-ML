@@ -6,7 +6,7 @@ function Header() {
     <>
     <Navbar bg="primary" expand="sm" variant="dark">
     <Container>
-      <Navbar.Brand>Pnuemonia Detection</Navbar.Brand>
+      <Navbar.Brand>Pnuemonia Detection WebApp</Navbar.Brand>
     </Container>
     </Navbar>
     </>

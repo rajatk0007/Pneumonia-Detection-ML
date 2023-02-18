@@ -6,6 +6,7 @@ const cors=require("cors");
 require("./database/connection");
 const Patients=require("./models/Patients");
 const bodyParser = require('body-parser');
+const axios=require("axios");
 const bucketName='pneumonia-test-bucket';
 const bucketRegion='ap-south-1';
 const accessKey='AKIAQ4ALCGDM72DUQS7C';
@@ -32,7 +33,17 @@ app.post('/upload',upload.single('ObservationImage'),async(req,res)=> {
   }
   s3.upload(params,async(err,data)=>{
     try{
+      const json=JSON.stringify({
+        "url":data.Location
+      })
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const result=await axios.post("http://127.0.0.1:8000/predict",json,config)
       FinalObject['ReportPhoto']=data.Location;
+      FinalObject['PredictionResult']=result.data.result;
       const Patient=new Patients(FinalObject);
       await Patient.save()
         res.send(Patient).status(201);
